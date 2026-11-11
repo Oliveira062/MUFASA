@@ -21,9 +21,8 @@
 ## Próximos passos
 
 ### Segurança
-- [ ] Revogar a chave antiga da Groq que circulou na parte F2 e usar só a chave nova.
 - [ ] Definir o segundo fator de autenticação no login do aluno.
-- [ ] Reescrever os títulos de seção da `AUDITORIA_SEGURANCA.md`, que ainda seguem um modelo genérico.
+
 
 ### Dados e métricas
 - [ ] Alinhar `indicadores.media_atual` com as notas das matrículas do B1.
