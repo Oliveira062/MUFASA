@@ -1,6 +1,6 @@
 # MUFASA
 
-Sistema de alerta precoce de evasão acadêmica. Versão 1.1.0.
+ONome Mufasa vem com o mascote Leão, e significa Monitoramento Universitário de frequência, Atividades, saúde e Aprendizagem.
 
 O MUFASA calcula um score de risco de evasão para cada aluno, gera alertas para a equipe da instituição e oferece um painel por perfil (aluno, docente, coordenação, núcleo de apoio, financeiro, gestão, encarregado e administração), com um assistente virtual (Mufa) que responde apenas com dados reais do banco.
 
