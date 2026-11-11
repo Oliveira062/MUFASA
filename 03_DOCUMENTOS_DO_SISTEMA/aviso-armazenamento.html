@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MUFASA – aviso de armazenamento</title>
+<!--
+  Componente de referência para o painel (F1).
+  - Sem dependência externa: nada de CDN, fonte ou script de terceiros.
+  - WCAG 2.1 AA: contraste >= 4,5:1, foco visível, operável só pelo teclado,
+    anunciado por leitor de tela, respeita zoom de 200% e telas de 320 px.
+  - Hoje só há armazenamento necessário: o aviso é informativo ("Entendi").
+    Se surgir categoria opcional, ela entra em CATEGORIAS_OPCIONAIS e o aviso
+    passa a mostrar "Aceitar" e "Recusar" com o mesmo destaque, nada pré-marcado.
+-->
+<style>
+  :root {
+    --fundo: #ffffff; --texto: #1a1a1a; --borda: #5c5c5c;
+    --primario: #0b4f8a; --primario-texto: #ffffff; --foco: #b35900;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fundo: #1c1c1c; --texto: #f2f2f2; --borda: #a6a6a6;
+            --primario: #8cc4ff; --primario-texto: #0d0d0d; --foco: #ffb366; }
+  }
+  body { margin: 0; font: 1rem/1.5 system-ui, sans-serif; background: var(--fundo); color: var(--texto); }
+  .aviso {
+    position: fixed; inset: auto 0 0 0; padding: 1rem; background: var(--fundo); color: var(--texto);
+    border-top: 2px solid var(--borda); box-shadow: 0 -2px 8px rgb(0 0 0 / .25);
+  }
+  .aviso[hidden] { display: none; }
+  .aviso h2 { font-size: 1.125rem; margin: 0 0 .5rem; }
+  .aviso p { margin: 0 0 .75rem; max-width: 70ch; }
+  .acoes { display: flex; flex-wrap: wrap; gap: .5rem; }
+  button, a.botao {
+    font: inherit; min-height: 44px; min-width: 44px; padding: .5rem 1rem; border-radius: 4px;
+    border: 2px solid var(--primario); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+  }
+  .principal { background: var(--primario); color: var(--primario-texto); }
+  .secundario { background: transparent; color: var(--texto); border-color: var(--borda); }
+  a { color: var(--primario); }
+  :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+  fieldset { border: 1px solid var(--borda); margin: 0 0 .75rem; padding: .5rem 1rem; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<section class="aviso" id="aviso-armazenamento" role="region" aria-labelledby="aviso-titulo" hidden>
+  <h2 id="aviso-titulo">Como o MUFASA usa o seu navegador</h2>
+  <p id="aviso-texto">
+    Guardamos apenas o necessário para o sistema funcionar: a sua sessão, enquanto a aba estiver aberta,
+    e a informação de que você já leu este aviso. Não usamos publicidade, rastreamento nem ferramentas de terceiros.
+  </p>
+  <div id="opcoes"></div>
+  <div class="acoes" id="acoes"></div>
+  <p><a href="POLITICA_DE_COOKIES.md">Ler a política de cookies</a> · <a href="POLITICA_DE_PRIVACIDADE.md">Política de privacidade</a></p>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  var CHAVE = "mufasa_aviso_armazenamento";
+  var VERSAO_POLITICA = "1.0";
+  var VALIDADE_MS = 365 * 24 * 60 * 60 * 1000;
+
+  // Hoje vazia. Exemplo de entrada futura:
+  // { id: "desempenho", nome: "Medição de desempenho", descricao: "...", fornecedor: "..." }
+  var CATEGORIAS_OPCIONAIS = [];
+
+  function ler() {
+    try {
+      var bruto = window.localStorage.getItem(CHAVE);
+      if (!bruto) return null;
+      var dado = JSON.parse(bruto);
+      if (dado.versao !== VERSAO_POLITICA || Date.now() - dado.em > VALIDADE_MS) return null;
+      return dado;
+    } catch (e) { return null; }
+  }
+
+  function gravar(escolhas) {
+    try {
+      window.localStorage.setItem(CHAVE, JSON.stringify({ versao: VERSAO_POLITICA, em: Date.now(), escolhas: escolhas }));
+    } catch (e) { /* navegador sem armazenamento: o aviso volta na próxima visita */ }
+  }
+
+  function botao(texto, classe, aoClicar) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = classe; b.textContent = texto;
+    b.addEventListener("click", aoClicar);
+    return b;
+  }
+
+  var aviso = document.getElementById("aviso-armazenamento");
+  var acoes = document.getElementById("acoes");
+  var opcoes = document.getElementById("opcoes");
+  var focoAnterior = null;
+
+  function fechar(escolhas) {
+    gravar(escolhas);
+    aviso.hidden = true;
+    if (focoAnterior && focoAnterior.focus) focoAnterior.focus();
+  }
+
+  function montar() {
+    acoes.textContent = ""; opcoes.textContent = "";
+
+    if (CATEGORIAS_OPCIONAIS.length === 0) {
+      acoes.appendChild(botao("Entendi", "principal", function () { fechar({}); }));
+      return;
+    }
+
+    // Com categorias opcionais: nada pré-marcado, aceitar e recusar com o mesmo destaque.
+    var grupo = document.createElement("fieldset");
+    var legenda = document.createElement("legend");
+    legenda.textContent = "Recursos opcionais";
+    grupo.appendChild(legenda);
+    CATEGORIAS_OPCIONAIS.forEach(function (c) {
+      var id = "opcao-" + c.id;
+      var rotulo = document.createElement("label");
+      var caixa = document.createElement("input");
+      caixa.type = "checkbox"; caixa.id = id; caixa.name = c.id; caixa.checked = false;
+      rotulo.htmlFor = id;
+      rotulo.appendChild(caixa);
+      rotulo.appendChild(document.createTextNode(" " + c.nome + " – " + c.descricao + " (" + c.fornecedor + ")"));
+      grupo.appendChild(rotulo);
+      grupo.appendChild(document.createElement("br"));
+    });
+    opcoes.appendChild(grupo);
+
+    function todas(valor) {
+      var r = {}; CATEGORIAS_OPCIONAIS.forEach(function (c) { r[c.id] = valor; }); return r;
+    }
+    function marcadas() {
+      var r = {}; CATEGORIAS_OPCIONAIS.forEach(function (c) { r[c.id] = document.getElementById("opcao-" + c.id).checked; }); return r;
+    }
+    acoes.appendChild(botao("Recusar opcionais", "principal", function () { fechar(todas(false)); }));
+    acoes.appendChild(botao("Aceitar todos", "principal", function () { fechar(todas(true)); }));
+    acoes.appendChild(botao("Salvar minha escolha", "secundario", function () { fechar(marcadas()); }));
+  }
+
+  function abrir() {
+    focoAnterior = document.activeElement;
+    montar();
+    aviso.hidden = false;
+    var primeiro = acoes.querySelector("button");
+    if (primeiro) primeiro.focus();
+  }
+
+  aviso.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && CATEGORIAS_OPCIONAIS.length === 0) fechar({});
+  });
+
+  // O painel chama window.mufasaPreferenciasPrivacidade() pelo link do rodapé.
+  window.mufasaPreferenciasPrivacidade = abrir;
+
+  if (!ler()) abrir();
+})();
+</script>
+</body>
+</html>

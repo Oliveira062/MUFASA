@@ -1,0 +1,85 @@
+# MUFASA completo em containers: banco, API, chat, calculo e painel.
+#
+#   python -m scripts.configurar --docker   # uma vez: cria o .env com senhas novas
+#   docker compose up -d --build            # sobe tudo (na 1a vez monta o banco)
+#   abra http://127.0.0.1:8501
+#
+# Cada servico e um container separado com reinicio automatico: se um cair,
+# o Docker sobe de novo e os outros continuam. Ver docs/04_USO_LOCAL_E_TESTES.md.
+
+x-app: &app
+  build: .
+  image: mufasa:1.1.0
+  env_file: .env
+  restart: unless-stopped
+  volumes:
+    - ./logs:/app/logs
+  depends_on:
+    montar:
+      condition: service_completed_successfully
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_SENHA:?rode python -m scripts.configurar --docker}
+    volumes:
+      - dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Roda uma vez: monta o banco se ainda nao existir (dump do B1 + sql/ + contas).
+  montar:
+    build: .
+    image: mufasa:1.1.0
+    env_file: .env
+    command: ["python", "-m", "scripts.montar_banco", "--sim", "--se-nao-existir"]
+    # Tarefa de uma vez so; roda como root para poder gravar credenciais/ na
+    # pasta do projeto quando as contas forem geradas (--contas-novas).
+    user: root
+    environment:
+      MUFASA_CREDENCIAIS: /app/credenciais/credenciais.csv
+    volumes:
+      - ./credenciais:/app/credenciais
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *app
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["127.0.0.1:8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/saude', timeout=3)"]
+      interval: 15s
+      retries: 3
+
+  chat:
+    <<: *app
+    command: ["uvicorn", "app.main_chat:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports: ["127.0.0.1:8001:8001"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/saude', timeout=3)"]
+      interval: 15s
+      retries: 3
+
+  calculo:
+    <<: *app
+    command: ["python", "-m", "app.servico_calculo"]
+
+  painel:
+    <<: *app
+    working_dir: /app/painel
+    command: ["streamlit", "run", "app.py", "--server.address", "0.0.0.0"]
+    ports: ["127.0.0.1:8501:8501"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3)"]
+      interval: 15s
+      retries: 3
+
+volumes:
+  dados:

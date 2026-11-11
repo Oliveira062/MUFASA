@@ -1,0 +1,80 @@
+[server]
+headless = true
+port = 8501
+address = "127.0.0.1"
+enableXsrfProtection = true
+enableCORS = true
+maxUploadSize = 20
+runOnSave = false
+# Serve painel/static (logo e fonte Inter) em app/static/...
+enableStaticServing = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = "none"
+
+[runner]
+magicEnabled = false
+
+# Tema com os tokens do Figma (MUFASA · Design System, modo claro).
+# Selos de risco e componentes proprios ficam em painel/ui.py.
+[theme]
+base = "light"
+primaryColor = "#C99720"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#FBF6EA"
+textColor = "#3D2B1F"
+linkColor = "#8C6410"
+linkUnderline = false
+borderColor = "#E6D5AC"
+dataframeBorderColor = "#F0E5C8"
+dataframeHeaderBackgroundColor = "#FBF6EA"
+showWidgetBorder = true
+baseRadius = "10px"
+buttonRadius = "10px"
+baseFontSize = 14
+font = "Inter, system-ui, sans-serif"
+headingFont = "Inter, system-ui, sans-serif"
+# h1..h4 do Figma: 28/22/18/16 px, Bold/Bold/Semi Bold/Semi Bold
+headingFontSizes = ["28px", "22px", "18px", "16px", "14px", "13px"]
+headingFontWeights = [700, 700, 600, 600, 600, 600]
+codeFont = "'Roboto Mono', ui-monospace, monospace"
+redColor = "#9A4A1E"
+redBackgroundColor = "#F6E1D3"
+redTextColor = "#9A4A1E"
+greenColor = "#3F6B2E"
+greenBackgroundColor = "#E6EFDF"
+greenTextColor = "#3F6B2E"
+yellowColor = "#B8860B"
+yellowBackgroundColor = "#F3E2B3"
+yellowTextColor = "#5C4410"
+blueColor = "#5B5141"
+blueBackgroundColor = "#EAE6DC"
+blueTextColor = "#5B5141"
+grayTextColor = "#94805C"
+chartCategoricalColors = ["#8C6410", "#C99720", "#E9C35C", "#6B5432", "#B8860B", "#94805C"]
+
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fontes/Inter-Regular.woff2"
+weight = 400
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fontes/Inter-Medium.woff2"
+weight = 500
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fontes/Inter-SemiBold.woff2"
+weight = 600
+[[theme.fontFaces]]
+family = "Inter"
+url = "app/static/fontes/Inter-Bold.woff2"
+weight = 700
+
+[theme.sidebar]
+backgroundColor = "#F5EBD3"
+secondaryBackgroundColor = "#FBF6EA"
+borderColor = "#E6D5AC"

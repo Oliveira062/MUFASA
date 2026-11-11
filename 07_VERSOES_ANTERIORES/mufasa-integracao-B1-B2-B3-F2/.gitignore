@@ -1,0 +1,38 @@
+# Ambiente virtual
+venv/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache de testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Segredos - NUNCA versionar
+.env
+*.env
+
+# Editores
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Dados reais de alunos - LGPD
+dados/*.csv
+dados/*.xlsx
+
+# Dumps de banco com dados de alunos - LGPD
+*.sql.gz
+*.dump
+dados/
+
+# Bancos locais de teste (SQLite) - podem conter historico de conversa
+*.db
+*.sqlite3

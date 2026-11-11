@@ -1,0 +1,15 @@
+*.apk
+*.zip
+*.db
+*.sqlite3
+.env
+*.env
+logs/
+credenciais*.csv
+contas_iniciais.sql
+__pycache__/
+.pytest_cache/
+venv/
+.venv/
+*.jks
+*.keystore
